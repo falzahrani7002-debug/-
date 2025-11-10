@@ -1,0 +1,76 @@
+import React, { useState } from 'react';
+import { useStars, getRewards, spendStars, unlockReward, Reward } from '../starManager';
+
+const StarCollectionSection: React.FC = () => {
+    const stars = useStars();
+    const [rewards, setRewards] = useState<Reward[]>(getRewards());
+    const [justBoughtId, setJustBoughtId] = useState<number | null>(null);
+
+    const handleRedeem = (reward: Reward) => {
+        if (stars >= reward.cost && !reward.unlocked) {
+            spendStars(reward.cost);
+            const updatedRewards = unlockReward(reward.id);
+            setRewards(updatedRewards);
+            setJustBoughtId(reward.id);
+            setTimeout(() => setJustBoughtId(null), 1500); // Animation timeout
+        }
+    };
+
+    return (
+        <div className="bg-gradient-to-br from-yellow-50 to-sky-100 py-16 px-4">
+            <div className="container mx-auto max-w-4xl">
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl font-bold text-sky-800 mb-4">⭐ تجميع النجوم ⭐</h2>
+                    <p className="text-lg text-gray-600">استخدم نجومك التي كسبتها بجد للحصول على مكافآت رائعة!</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-lg mb-12 flex justify-center items-center gap-x-4">
+                    <h3 className="text-2xl font-bold text-gray-700">رصيدك الحالي:</h3>
+                    <div className="flex items-center gap-x-2 bg-yellow-400 text-yellow-900 font-bold px-6 py-2 rounded-full text-3xl">
+                        <span>⭐</span>
+                        <span>{stars}</span>
+                    </div>
+                </div>
+
+                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 className="text-3xl font-bold text-sky-900 mb-8 text-center">🛒 متجر الأبطال</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        {rewards.map(reward => {
+                            const canAfford = stars >= reward.cost;
+                            const isJustBought = justBoughtId === reward.id;
+                            return (
+                                <div 
+                                    key={reward.id} 
+                                    className={`p-4 rounded-xl text-center border-4 flex flex-col items-center justify-between
+                                        ${reward.unlocked ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}
+                                        ${isJustBought ? 'animate-bounce' : ''}
+                                    `}
+                                >
+                                    <div className={`text-6xl mb-3 ${!reward.unlocked && !canAfford ? 'opacity-40' : ''}`}>{reward.icon}</div>
+                                    <h4 className={`text-lg font-bold ${reward.unlocked ? 'text-green-800' : 'text-gray-800'}`}>{reward.name}</h4>
+                                    
+                                    {reward.unlocked ? (
+                                        <div className="mt-3 bg-green-500 text-white font-bold py-2 px-4 rounded-full w-full">
+                                            تم الشراء
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleRedeem(reward)}
+                                            disabled={!canAfford}
+                                            className="mt-3 w-full bg-sky-600 text-white font-bold py-2 px-4 rounded-full hover:bg-sky-700 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-x-1"
+                                        >
+                                            <span>⭐</span>
+                                            <span>{reward.cost}</span>
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default StarCollectionSection;
