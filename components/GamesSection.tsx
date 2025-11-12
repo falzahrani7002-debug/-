@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { addStars } from '../starManager';
 
+// --- ICONS ---
+const ChildIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 10c-3.87 0-7 1.57-7 3.5V19h14v-3.5c0-1.93-3.13-3.5-7-3.5z"/></svg>
+);
+const AdultIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+);
+const BackIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+);
+
+
 // Game 1: Catcher Game Types and Data
 interface FoodItem {
   id: number;
@@ -113,7 +125,7 @@ const CatcherGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     <div className="bg-sky-50 p-6 rounded-2xl shadow-lg border-4 border-sky-200">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-3xl font-bold text-sky-900">لعبة: امسك الطعام الصحي</h3>
-        <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition">العودة</button>
+        <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
       </div>
       <p className="text-gray-700 mb-6">اضغط على الأطعمة الصحية لتجمع النقاط، وتجنب الأطعمة غير الصحية!</p>
       <div className="flex justify-around items-center bg-sky-100 p-4 rounded-lg mb-4">
@@ -190,7 +202,7 @@ const ChooserGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="bg-sky-50 p-6 rounded-2xl shadow-lg border-4 border-sky-200">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-3xl font-bold text-sky-900">لعبة: الاختيار الصحيح</h3>
-                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition">العودة</button>
+                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
             </div>
             <p className="text-gray-700 mb-6">اختر الطعام الصحي بين الخيارين لتكسب النقاط!</p>
 
@@ -323,7 +335,7 @@ const NeedleTimeGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
          <div className="bg-sky-50 p-6 rounded-2xl shadow-lg border-4 border-sky-200">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-3xl font-bold text-sky-900">لعبة: وقت الإبرة</h3>
-                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition">العودة</button>
+                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
             </div>
             <p className="text-gray-700 mb-6">صديقك نسي أن يأخذ الإنسولين! ساعده بسرعة قبل أن يرتفع السكر.</p>
             
@@ -448,7 +460,7 @@ const StarCollectorGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="bg-yellow-50 p-6 rounded-2xl shadow-lg border-4 border-yellow-200">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-3xl font-bold text-yellow-900">لعبة: تجميع النجوم</h3>
-                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition">العودة</button>
+                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
             </div>
             <p className="text-gray-700 mb-6">اجمع النجوم بسرعة! لكن احذر من القنابل، فهي ستخصم من نقاطك!</p>
             <div className="flex justify-around items-center bg-yellow-100 p-4 rounded-lg mb-4">
@@ -490,23 +502,289 @@ const StarCollectorGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     );
 };
 
+// --- ADULTS GAMES ---
+
+// Carb Counting Game Data and Component
+interface CarbQuestion {
+    name: string;
+    icon: string;
+    options: number[];
+    correctAnswer: number;
+    explanation: string;
+}
+
+const carbQuestions: CarbQuestion[] = [
+    { name: "تفاحة متوسطة", icon: '🍎', options: [5, 15, 30], correctAnswer: 15, explanation: "تفاحة متوسطة تحتوي عادة على حوالي 15 جرامًا من الكربوهيدرات." },
+    { name: "شريحة خبز أبيض", icon: '🍞', options: [15, 25, 40], correctAnswer: 15, explanation: "شريحة واحدة من الخبز الأبيض تحتوي على ما يقارب 15 جرامًا من الكربوهيدرات." },
+    { name: "كوب حليب (240 مل)", icon: '🥛', options: [12, 20, 35], correctAnswer: 12, explanation: "كوب واحد من الحليب يحتوي عادة على حوالي 12 جرامًا من الكربوهيدرات." },
+    { name: "موزة صغيرة", icon: '🍌', options: [10, 20, 30], correctAnswer: 20, explanation: "موزة صغيرة تحتوي على حوالي 20 جرامًا من الكربوهيدرات." },
+    { name: "نصف كوب أرز مطبوخ", icon: '🍚', options: [10, 22, 45], correctAnswer: 22, explanation: "نصف كوب من الأرز المطبوخ يحتوي على ما يقارب 22 جرامًا من الكربوهيدرات." },
+    { name: "علبة زبيب صغيرة", icon: '🍇', options: [15, 30, 50], correctAnswer: 15, explanation: "علبة صغيرة من الزبيب (حوالي 30 جرام) تحتوي على 15 جرامًا من الكربوهيدرات." },
+    { name: "نصف كوب معكرونة مطبوخة", icon: '🍝', options: [10, 20, 40], correctAnswer: 20, explanation: "نصف كوب من المعكرونة المطبوخة يحتوي على حوالي 20 جرامًا من الكربوهيدرات." },
+];
+
+const CarbCountingGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const [gameState, setGameState] = useState<'idle' | 'playing' | 'feedback' | 'finished'>('idle');
+    const [questions, setQuestions] = useState<CarbQuestion[]>([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+
+    const startGame = () => {
+        setScore(0);
+        setCurrentQuestionIndex(0);
+        setQuestions(shuffleArray([...carbQuestions]));
+        setGameState('playing');
+        setSelectedAnswer(null);
+    };
+
+    const handleAnswer = (answer: number) => {
+        if (gameState !== 'playing') return;
+        
+        setSelectedAnswer(answer);
+        if (answer === questions[currentQuestionIndex].correctAnswer) {
+            setScore(s => s + 1);
+        }
+        setGameState('feedback');
+
+        setTimeout(() => {
+            if (currentQuestionIndex + 1 >= questions.length) {
+                setGameState('finished');
+            } else {
+                setCurrentQuestionIndex(i => i + 1);
+                setSelectedAnswer(null);
+                setGameState('playing');
+            }
+        }, 3000);
+    };
+
+    const currentQuestion = questions[currentQuestionIndex];
+
+    return (
+        <div className="bg-blue-50 p-6 rounded-2xl shadow-lg border-4 border-blue-200">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-3xl font-bold text-blue-900">لعبة: خبير حساب الكربوهيدرات</h3>
+                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
+            </div>
+            <p className="text-gray-700 mb-6">تدرب على تقدير الكربوهيدرات في الأطعمة الشائعة. مهارة أساسية لإدارة السكري!</p>
+
+            {gameState !== 'idle' && (
+                 <div className="flex justify-around items-center bg-blue-100 p-4 rounded-lg mb-4">
+                    <div className="text-2xl font-bold text-green-600">النتيجة: {score} / {questions.length}</div>
+                    <div className="text-2xl font-bold text-blue-600">السؤال: {Math.min(currentQuestionIndex + 1, questions.length)} / {questions.length}</div>
+                </div>
+            )}
+            
+            <div className="relative w-full min-h-[400px] flex flex-col justify-center items-center bg-gradient-to-b from-blue-200 to-blue-300 rounded-lg p-8 shadow-inner">
+                 {(gameState === 'idle' || gameState === 'finished') ? (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col justify-center items-center z-10 rounded-lg text-center p-4">
+                        {gameState === 'finished' ? (
+                            <>
+                               <h4 className="text-5xl font-bold text-white mb-4">أنهيت اللعبة!</h4>
+                               <p className="text-2xl text-yellow-300 mb-6">نتيجتك النهائية: {score} من {questions.length}</p>
+                            </>
+                        ) : (
+                            <h4 className="text-4xl font-bold text-white mb-4">هل أنت مستعد لاختبار معرفتك؟</h4>
+                        )}
+                       <button onClick={startGame} className="bg-yellow-400 text-yellow-900 font-bold py-4 px-10 rounded-full text-2xl shadow-lg hover:bg-yellow-500 transition-transform transform hover:scale-110 duration-300">
+                          {gameState === 'finished' ? 'العب مرة أخرى' : 'ابدأ'}
+                       </button>
+                   </div>
+                 ) : (
+                    currentQuestion && (
+                        <div className="w-full text-center">
+                            <div className="text-7xl mb-4">{currentQuestion.icon}</div>
+                            <h4 className="text-2xl font-bold text-blue-800 mb-6">كم جرامًا من الكربوهيدرات في "{currentQuestion.name}"؟</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {currentQuestion.options.map(option => {
+                                    const isSelected = selectedAnswer === option;
+                                    const isCorrect = currentQuestion.correctAnswer === option;
+                                    let buttonClass = 'bg-white hover:bg-blue-100 text-gray-600';
+                                    if (gameState === 'feedback') {
+                                        if (isCorrect) {
+                                            buttonClass = 'bg-green-200 text-green-800';
+                                        } else if (isSelected && !isCorrect) {
+                                            buttonClass = 'bg-red-200 text-red-800';
+                                        } else {
+                                            buttonClass = 'bg-gray-100 text-gray-500 opacity-70';
+                                        }
+                                    }
+                                    return (
+                                        <button
+                                            key={option}
+                                            onClick={() => handleAnswer(option)}
+                                            disabled={gameState === 'feedback'}
+                                            className={`p-4 rounded-lg transition-all duration-300 flex flex-col items-center justify-center h-32 ${buttonClass}`}
+                                        >
+                                            <span className="text-4xl font-extrabold text-amber-600" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>
+                                                {option}
+                                            </span>
+                                            <span className="text-md mt-1 font-semibold text-amber-600">جرام</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {gameState === 'feedback' && (
+                                <div className="mt-6 p-4 bg-yellow-100 border-r-4 border-yellow-400 rounded">
+                                    <p className="font-semibold text-yellow-800">💡 معلومة: <span className="font-normal">{currentQuestion.explanation}</span></p>
+                                </div>
+                            )}
+                        </div>
+                    )
+                 )}
+            </div>
+        </div>
+    );
+};
+
+interface Scenario {
+    title: string;
+    icon: string;
+    text: string;
+    choices: { text: string; correct: boolean, feedback: string }[];
+}
+
+const scenarios: Scenario[] = [
+    {
+        title: "الموقف المحرج",
+        icon: '😳',
+        text: "أنت في اجتماع عمل مهم. فجأة، بدأت تشعر بعطش شديد، وعدم وضوح في الرؤية. تذكرت أنك نسيت أخذ جرعة الأنسولين قبل الغداء. ماذا تفعل؟",
+        choices: [
+            { text: "أتجاهل الأمر وأتحمل حتى ينتهي الاجتماع.", correct: false, feedback: "هذا قد يكون خطيرًا! تجاهل ارتفاع السكر الشديد يمكن أن يؤدي إلى مضاعفات. صحتك تأتي أولاً دائمًا." },
+            { text: "أستأذن بهدوء، أفحص السكر وآخذ جرعة، ثم أعود.", correct: true, feedback: "تصرف حكيم! إدارة الموقف بهدوء ووضع صحتك أولاً هو التصرف الصحيح والمسؤول." },
+            { text: "أغادر الاجتماع فورًا دون تفسير.", correct: false, feedback: "قد يحل هذا المشكلة الصحية مؤقتًا، ولكنه قد يبدو غير مهني. من الأفضل دائمًا الاستئذان أولاً." },
+        ]
+    },
+    {
+        title: "ورطة المطعم",
+        icon: '🍽️',
+        text: "أنت في مطعم مع أصدقائك. الجميع يطلب أطباقًا غنية بالكربوهيدرات والحلويات. أنت تشعر بالضغط لتشاركهم، لكنك تعلم أن هذا سيعبث بمستوى سكرك. ماذا تفعل؟",
+        choices: [
+            { text: "أطلب نفس ما طلبوه؛ لا أريد أن أكون مختلفًا.", correct: false, feedback: "قد يكون هذا محرجًا، لكن صحتك أهم. طلب ما يناسبك هو علامة على القوة والوعي." },
+            { text: "أبحث في القائمة عن خيار صحي وأطلبه بثقة.", correct: true, feedback: "ممتاز! اختيارك يدل على تحكمك وفهمك. يمكنك الاستمتاع بوقتك مع الحفاظ على صحتك." },
+            { text: "أختلق عذرًا وأقول إنني لست جائعًا.", correct: false, feedback: "تجنب الموقف ليس حلاً. من المهم أن تتعلم كيف تتعامل مع هذه المواقف الاجتماعية بثقة." },
+        ]
+    },
+    {
+        title: "هبوط أثناء الرياضة",
+        icon: '🏃‍♂️',
+        text: "أنت في منتصف تمرين رياضي جيد. فجأة، بدأت تشعر بالرجفة، والتعرق البارد، والارتباك - علامات انخفاض السكر. ماذا تفعل؟",
+        choices: [
+            { text: "أتجاهل الأمر وأكمل التمرين؛ لا أريد أن أضيع مجهودي.", correct: false, feedback: "خطير جدًا! الاستمرار في التمرين مع انخفاض السكر يمكن أن يؤدي إلى فقدان الوعي. توقف فورًا." },
+            { text: "أتوقف فورًا، وأتناول مصدر سكر سريع (مثل التمر)، وأرتاح.", correct: true, feedback: "تصرف مثالي! لقد استمعت لجسدك وتصرفت بسرعة وأمان. هذه هي الطريقة الصحيحة للتعامل مع انخفاض السكر." },
+            { text: "أبطئ من سرعة التمرين وأنتظر حتى يزول الشعور.", correct: false, feedback: "قد لا يكون هذا كافيًا. انخفاض السكر يتطلب علاجًا فوريًا بمصدر سكر سريع، وليس فقط تقليل المجهود." },
+        ]
+    }
+];
+
+const EmbarrassingSituationGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const [gameState, setGameState] = useState<'idle' | 'playing' | 'feedback' | 'finished'>('idle');
+    const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [feedback, setFeedback] = useState<{ message: string; correct: boolean } | null>(null);
+
+    const startGame = () => {
+        setCurrentScenarioIndex(0);
+        setScore(0);
+        setFeedback(null);
+        setGameState('playing');
+    };
+    
+    const handleChoice = (choice: { correct: boolean, feedback: string }) => {
+        if (gameState !== 'playing') return;
+        
+        if (choice.correct) {
+            setScore(prev => prev + 1);
+        }
+        setFeedback({ message: choice.feedback, correct: choice.correct });
+        setGameState('feedback');
+    };
+
+    const handleNext = () => {
+        if (currentScenarioIndex + 1 >= scenarios.length) {
+            setGameState('finished');
+        } else {
+            setCurrentScenarioIndex(prev => prev + 1);
+            setFeedback(null);
+            setGameState('playing');
+        }
+    };
+
+    const currentScenario = scenarios[currentScenarioIndex];
+
+    return (
+        <div className="bg-blue-50 p-6 rounded-2xl shadow-lg border-4 border-blue-200">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-3xl font-bold text-blue-900">لعبة: مواقف واقعية</h3>
+                <button onClick={onBack} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"> <BackIcon className="w-5 h-5"/> عودة</button>
+            </div>
+             <div className="relative w-full min-h-[450px] flex flex-col justify-center items-center bg-gradient-to-b from-blue-200 to-blue-300 rounded-lg p-8 shadow-inner">
+                {gameState === 'idle' && (
+                    <div className="text-center">
+                        <div className="text-7xl mb-4">🧠</div>
+                        <h4 className="text-2xl font-bold text-blue-800 mb-6">تعلم كيف تتصرف في المواقف الصعبة.</h4>
+                        <button onClick={startGame} className="bg-yellow-400 text-yellow-900 font-bold py-4 px-10 rounded-full text-2xl shadow-lg hover:bg-yellow-500 transition-transform transform hover:scale-110 duration-300">
+                            ابدأ اللعبة
+                        </button>
+                    </div>
+                )}
+                 {gameState === 'finished' && (
+                    <div className="text-center">
+                        <div className="text-7xl mb-4">🏆</div>
+                         <h4 className="text-4xl font-bold text-white mb-4">أحسنت!</h4>
+                         <p className="text-2xl text-yellow-300 mb-6">نتيجتك: {score} من {scenarios.length} إجابات صحيحة</p>
+                        <button onClick={startGame} className="bg-yellow-400 text-yellow-900 font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:bg-yellow-500">
+                            العب مرة أخرى
+                        </button>
+                    </div>
+                )}
+                {gameState === 'playing' && currentScenario && (
+                    <div className="w-full text-center">
+                        <div className="text-2xl font-bold text-blue-600 mb-2">الموقف {currentScenarioIndex + 1} من {scenarios.length}</div>
+                        <h4 className="text-2xl font-bold text-blue-800 mb-4">{currentScenario.title} {currentScenario.icon}</h4>
+                        <p className="text-lg text-blue-900 leading-relaxed mb-8">{currentScenario.text}</p>
+                        <div className="space-y-4">
+                            {currentScenario.choices.map((choice, index) => (
+                                <button key={index} onClick={() => handleChoice(choice)} className="w-full text-lg bg-white font-semibold text-gray-800 p-4 rounded-lg shadow hover:bg-blue-100 transition-colors duration-300">
+                                    {choice.text}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {gameState === 'feedback' && feedback && (
+                    <div className="text-center">
+                        <div className={`text-6xl mb-4 ${feedback.correct ? 'animate-bounce' : ''}`}>{feedback.correct ? '✅' : '❌'}</div>
+                        <h4 className={`text-3xl font-bold mb-4 ${feedback.correct ? 'text-green-700' : 'text-red-700'}`}>{feedback.correct ? "تصرف صحيح!" : "فكر مرة أخرى!"}</h4>
+                        <p className="text-lg text-blue-900 mb-8 max-w-md mx-auto">{feedback.message}</p>
+                        <button onClick={handleNext} className="bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:bg-sky-700">
+                            {currentScenarioIndex + 1 >= scenarios.length ? 'إنهاء اللعبة' : 'الموقف التالي'}
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 
 // Main Section Component
 const GamesSection: React.FC = () => {
-    const [selectedGame, setSelectedGame] = useState<'catcher' | 'chooser' | 'needle' | 'starCollector' | null>(null);
+    const [view, setView] = useState<'main' | 'kids' | 'adults'>('main');
+    const [selectedGame, setSelectedGame] = useState<string | null>(null);
 
-    const renderGame = () => {
-        switch (selectedGame) {
-            case 'catcher':
-                return <CatcherGame onBack={() => setSelectedGame(null)} />;
-            case 'chooser':
-                return <ChooserGame onBack={() => setSelectedGame(null)} />;
-            case 'needle':
-                return <NeedleTimeGame onBack={() => setSelectedGame(null)} />;
-            case 'starCollector':
-                return <StarCollectorGame onBack={() => setSelectedGame(null)} />;
-            default:
-                return (
+    const renderGameSelection = () => {
+        if (view === 'kids') {
+            if (selectedGame === 'catcher') return <CatcherGame onBack={() => setSelectedGame(null)} />;
+            if (selectedGame === 'chooser') return <ChooserGame onBack={() => setSelectedGame(null)} />;
+            if (selectedGame === 'needle') return <NeedleTimeGame onBack={() => setSelectedGame(null)} />;
+            if (selectedGame === 'starCollector') return <StarCollectorGame onBack={() => setSelectedGame(null)} />;
+            
+            return (
+                 <div>
+                    <button onClick={() => setView('main')} className="mb-8 bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition flex items-center gap-2">
+                         <BackIcon className="w-5 h-5"/> العودة إلى الأقسام
+                    </button>
                     <div className="grid md:grid-cols-2 gap-8">
                         <div onClick={() => setSelectedGame('catcher')} className="bg-sky-50 p-8 rounded-2xl shadow-lg border-4 border-transparent hover:border-sky-400 cursor-pointer transition-all duration-300 flex flex-col items-center">
                             <div className="text-6xl mb-4">🖐️</div>
@@ -529,16 +807,57 @@ const GamesSection: React.FC = () => {
                             <p className="text-gray-700">لعبة سريعة وصعبة! اجمع النجوم لزيادة رصيدك، لكن احذر من القنابل!</p>
                         </div>
                     </div>
-                );
+                </div>
+            );
         }
+
+        if (view === 'adults') {
+            if (selectedGame === 'nutrition') return <CarbCountingGame onBack={() => setSelectedGame(null)} />;
+            if (selectedGame === 'embarrassing') return <EmbarrassingSituationGame onBack={() => setSelectedGame(null)} />;
+             return (
+                 <div>
+                    <button onClick={() => setView('main')} className="mb-8 bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition flex items-center gap-2">
+                         <BackIcon className="w-5 h-5"/> العودة إلى الأقسام
+                    </button>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div onClick={() => setSelectedGame('nutrition')} className="bg-blue-50 p-8 rounded-2xl shadow-lg border-4 border-transparent hover:border-blue-400 cursor-pointer transition-all duration-300 flex flex-col items-center">
+                            <div className="text-6xl mb-4">🥗</div>
+                            <h3 className="text-3xl font-bold text-blue-900 mb-2">خبير التغذية</h3>
+                            <p className="text-gray-700">اختبر معلوماتك في حساب الكربوهيدرات واتخاذ قرارات غذائية معقدة.</p>
+                        </div>
+                        <div onClick={() => setSelectedGame('embarrassing')} className="bg-blue-50 p-8 rounded-2xl shadow-lg border-4 border-transparent hover:border-blue-400 cursor-pointer transition-all duration-300 flex flex-col items-center">
+                             <div className="text-6xl mb-4">😳</div>
+                            <h3 className="text-3xl font-bold text-blue-900 mb-2">مواقف واقعية</h3>
+                            <p className="text-gray-700">تعامل مع مواقف يومية لإدارة السكري، مثل أيام المرض أو المناسبات الخاصة.</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main view for selecting a category
+        return (
+            <div className="grid md:grid-cols-2 gap-12">
+                <div onClick={() => setView('kids')} className="bg-gradient-to-br from-sky-100 to-sky-200 p-10 rounded-3xl shadow-xl border-4 border-transparent hover:border-sky-400 cursor-pointer transition-all duration-300 flex flex-col items-center transform hover:scale-105">
+                    <ChildIcon className="w-24 h-24 text-sky-600 mb-4" />
+                    <h3 className="text-4xl font-bold text-sky-900 mb-2">قسم الصغار</h3>
+                    <p className="text-gray-700 text-lg">ألعاب ممتعة وتفاعلية لتعليم أبطالنا الصغار أساسيات السكري.</p>
+                </div>
+                <div onClick={() => setView('adults')} className="bg-gradient-to-br from-blue-100 to-blue-200 p-10 rounded-3xl shadow-xl border-4 border-transparent hover:border-blue-400 cursor-pointer transition-all duration-300 flex flex-col items-center transform hover:scale-105">
+                    <AdultIcon className="w-24 h-24 text-blue-600 mb-4" />
+                    <h3 className="text-4xl font-bold text-blue-900 mb-2">قسم الكبار</h3>
+                    <p className="text-gray-700 text-lg">ألعاب تعليمية متقدمة لمساعدة أولياء الأمور على فهم أعمق لإدارة السكري.</p>
+                </div>
+            </div>
+        );
     };
     
     return (
-        <div className="bg-white py-16 px-4 text-center">
-            <div className="container mx-auto max-w-5xl">
+        <div className="bg-white py-16 px-4">
+            <div className="container mx-auto max-w-5xl text-center">
                 <h2 className="text-4xl font-bold text-sky-800 mb-4">ألعاب السكر الممتعة!</h2>
                 <p className="text-lg text-gray-600 mb-12">العب وتعلم كيف تكون بطلاً في التحكم بالسكري.</p>
-                {renderGame()}
+                {renderGameSelection()}
             </div>
         </div>
     );

@@ -30,8 +30,16 @@ const dispatchStarUpdate = () => {
 export const getStars = (): number => {
   try {
     const stars = localStorage.getItem(STAR_STORAGE_KEY);
-    return stars ? parseInt(stars, 10) : 0;
+    // If it's the first time the user opens the app, stars will be null.
+    // We initialize it to 0 and save it to ensure persistence.
+    if (stars === null) {
+      localStorage.setItem(STAR_STORAGE_KEY, '0');
+      return 0;
+    }
+    return parseInt(stars, 10);
   } catch (e) {
+    // In case of any error (e.g., corrupted data), reset to 0 for safety.
+    localStorage.setItem(STAR_STORAGE_KEY, '0');
     return 0;
   }
 };

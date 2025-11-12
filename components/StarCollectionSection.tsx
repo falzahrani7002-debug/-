@@ -1,10 +1,47 @@
 import React, { useState } from 'react';
 import { useStars, getRewards, spendStars, unlockReward, Reward } from '../starManager';
 
+// A special effect component for the jewel reward
+const JewelRainEffect: React.FC = () => {
+    const jewelCount = 50;
+    return (
+        <>
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-50">
+                {Array.from({ length: jewelCount }).map((_, i) => {
+                    const style = {
+                        left: `${Math.random() * 100}vw`,
+                        fontSize: `${1 + Math.random() * 1.5}rem`,
+                        animationDuration: `${2 + Math.random() * 3}s`,
+                        animationDelay: `${Math.random() * 5}s`,
+                    };
+                    return <i key={i} className="jeweldrop" style={style}>💎</i>;
+                })}
+            </div>
+            <style>{`
+                .jeweldrop {
+                    position: absolute;
+                    top: -5vh;
+                    animation: fall-jewel linear forwards;
+                    text-shadow: 0 0 5px rgba(255,255,255,0.5), 0 0 10px rgba(0, 255, 255, 0.5);
+                }
+                @keyframes fall-jewel {
+                    from {
+                        transform: translateY(0vh) rotate(0deg);
+                    }
+                    to {
+                        transform: translateY(105vh) rotate(360deg);
+                    }
+                }
+            `}</style>
+        </>
+    );
+};
+
 const StarCollectionSection: React.FC = () => {
     const stars = useStars();
     const [rewards, setRewards] = useState<Reward[]>(getRewards());
     const [justBoughtId, setJustBoughtId] = useState<number | null>(null);
+    const [showJewelRain, setShowJewelRain] = useState(false);
 
     const handleRedeem = (reward: Reward) => {
         if (stars >= reward.cost && !reward.unlocked) {
@@ -13,11 +50,18 @@ const StarCollectionSection: React.FC = () => {
             setRewards(updatedRewards);
             setJustBoughtId(reward.id);
             setTimeout(() => setJustBoughtId(null), 1500); // Animation timeout
+
+            // If it's the special gem, trigger the rain effect!
+            if (reward.id === 6) { // ID for "جوهرة الإلتزام"
+                setShowJewelRain(true);
+                setTimeout(() => setShowJewelRain(false), 5000); // Effect lasts for 5 seconds
+            }
         }
     };
 
     return (
         <div className="bg-gradient-to-br from-yellow-50 to-sky-100 py-16 px-4">
+            {showJewelRain && <JewelRainEffect />}
             <div className="container mx-auto max-w-4xl">
                 <div className="text-center mb-12">
                     <h2 className="text-4xl font-bold text-sky-800 mb-4">⭐ تجميع النجوم ⭐</h2>

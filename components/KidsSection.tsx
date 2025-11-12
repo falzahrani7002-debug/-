@@ -132,6 +132,39 @@ const KidsSection: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+    const audioCacheRef = useRef<Map<string, string>>(new Map());
+
+    // Pre-fetch the first story on component mount for a faster user experience
+    useEffect(() => {
+        const prefetchFirstStory = async () => {
+            const firstStory = stories[0];
+            if (!audioCacheRef.current.has(firstStory.title)) {
+                try {
+                    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+                    const response = await ai.models.generateContent({
+                        model: "gemini-2.5-flash-preview-tts",
+                        contents: [{ parts: [{ text: `Say with a friendly and engaging tone for a child: ${firstStory.content}` }] }],
+                        config: {
+                            responseModalities: [Modality.AUDIO],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: { voiceName: firstStory.voice },
+                                },
+                            },
+                        },
+                    });
+                    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                    if (base64Audio) {
+                        audioCacheRef.current.set(firstStory.title, base64Audio);
+                    }
+                } catch (err) {
+                    console.error("Failed to pre-fetch story:", err);
+                    // Fail silently, user can still fetch on click
+                }
+            }
+        };
+        prefetchFirstStory();
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -166,6 +199,33 @@ const KidsSection: React.FC = () => {
         setError(null);
 
         try {
+            let base64Audio = audioCacheRef.current.get(story.title);
+
+            // If not in cache, fetch from API
+            if (!base64Audio) {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash-preview-tts",
+                    contents: [{ parts: [{ text: `Say with a friendly and engaging tone for a child: ${story.content}` }] }],
+                    config: {
+                        responseModalities: [Modality.AUDIO],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: story.voice },
+                            },
+                        },
+                    },
+                });
+
+                base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                if (base64Audio) {
+                    audioCacheRef.current.set(story.title, base64Audio); // Cache the new audio
+                } else {
+                    throw new Error("لم يتم العثور على بيانات صوتية.");
+                }
+            }
+            
+            // Decode and play the audio
             if (!audioContextRef.current) {
                 audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
             }
@@ -173,22 +233,6 @@ const KidsSection: React.FC = () => {
                 await audioContextRef.current.resume();
             }
             
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-            
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash-preview-tts",
-                contents: [{ parts: [{ text: `Say with a friendly and engaging tone for a child: ${story.content}` }] }],
-                config: {
-                    responseModalities: [Modality.AUDIO],
-                    speechConfig: {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: story.voice },
-                        },
-                    },
-                },
-            });
-
-            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
             if (base64Audio && audioContextRef.current) {
                 const audioBuffer = await decodeAudioData(
                     decode(base64Audio),
@@ -211,8 +255,6 @@ const KidsSection: React.FC = () => {
                         audioSourceRef.current = null;
                     }
                 };
-            } else {
-                throw new Error("لم يتم العثور على بيانات صوتية.");
             }
         } catch (err) {
             console.error(err);
